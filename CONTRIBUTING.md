@@ -13,7 +13,7 @@
    - Clona **tu propio repositorio** a tu máquina local.
 
    ```bash
-   git clone https://github.com/francisco-JGC/SincIQ_TESIS.git
+   git clone https://github.com/francisco-JGC/Inventory-plus-backend.git
    ```
 
    ### Sintaxis de los Commits
