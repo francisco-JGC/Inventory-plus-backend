@@ -13,12 +13,9 @@ router.post('/', isAuth, async (req, res) => {
     return res.status(400).json({
       message: user.message
     })
-  } else {
-    return res.status(201).json({
-      message: 'Usuario creado con éxito',
-      data: user.data
-    })
   }
+
+  return res.status(201).json(user.data)
 })
 
 router.post('/find', isAuth, async (req, res) => {
@@ -30,11 +27,9 @@ router.post('/find', isAuth, async (req, res) => {
     return res.status(404).json({
       message: user.message
     })
-  } else {
-    return res.status(200).json({
-      data: user.data
-    })
   }
+
+  return res.status(200).json(user.data)
 })
 
 export default router
