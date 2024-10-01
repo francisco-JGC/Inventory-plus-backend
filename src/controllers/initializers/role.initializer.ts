@@ -1,5 +1,6 @@
 import { AppDataSource } from '../../config/database.config'
 import { Role } from '../../entities/role/role.entity'
+import { handleNotFound } from '../types'
 import { createDefaultUsers } from './user.initializer'
 
 export const createDefaultRoles = async () => {
@@ -33,7 +34,8 @@ export const createDefaultRoles = async () => {
     }
 
     return await createDefaultUsers()
-  } catch (error) {
+  } catch (error: any) {
     console.error({ error })
+    return handleNotFound(error.message)
   }
 }
