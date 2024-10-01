@@ -2,9 +2,9 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   CreateDateColumn,
-  JoinColumn
+  ManyToMany,
+  JoinTable
 } from 'typeorm'
 import { Role } from '../role/role.entity'
 
@@ -22,9 +22,9 @@ export class User {
   @Column({ nullable: true })
   password: string
 
-  @OneToMany(() => Role, (Role) => Role.user)
-  @JoinColumn()
-  roles?: Role[]
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable()
+  roles: Role[]
 
   @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date
