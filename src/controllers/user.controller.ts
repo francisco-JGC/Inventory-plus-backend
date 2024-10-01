@@ -1,12 +1,19 @@
 import { hash } from 'bcrypt'
 import { User } from '../entities/user/user.entity'
 import { AppDataSource } from '../config/database.config'
-import type { IHandleResponseController } from './types'
+import {
+  handleError,
+  handleNotFound,
+  handleSuccess,
+  type IHandleResponseController
+} from './types'
 import {
   ICreateUser,
   IResponseUser,
   IFindUserByEmail
 } from '../entities/user/types'
+import { getRoleByName } from './role.controller'
+import { Role } from '../entities/role/role.entity'
 
 export const createUser = async ({
   username,
@@ -86,25 +93,56 @@ export const findUserByEmail = async ({
     })
 
     if (!user) {
-      return {
-        success: false,
-        message: 'Usuario no encontrado'
-      }
+      return handleNotFound('Usuario no encontrado')
     }
 
-    return {
-      data: {
-        username: user.username,
-        email: user.email,
-        id: user.id,
-        roles: user.roles
-      },
-      success: true
-    }
+    return handleSuccess({
+      username: user.username,
+      email: user.email,
+      id: user.id,
+      roles: user.roles
+    })
   } catch (error: any) {
-    return {
-      message: error.message,
-      success: false
+    return handleError(error.message)
+  }
+}
+
+export const assignRoleToUser = async ({
+  userId,
+  role_name
+}: {
+  userId: number
+  role_name: string
+}): Promise<IHandleResponseController<IResponseUser>> => {
+  try {
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: { id: userId },
+      relations: ['roles']
+    })
+
+    if (!user) {
+      return handleNotFound('Usuario no encontrado')
     }
+
+    const { data: role, success } = await getRoleByName(role_name)
+
+    if (!success) {
+      return handleNotFound('No se encontro un rol con ese nombre')
+    }
+
+    const roleExists = user.roles.find(
+      (itemRole) => itemRole.id === Number(role?.id)
+    )
+
+    if (roleExists) {
+      return handleNotFound('El usuario ya tiene asignado este rol')
+    }
+
+    user.roles.push(role as Role)
+    const response = await AppDataSource.getRepository(User).save(user)
+
+    return handleSuccess(response)
+  } catch (error: any) {
+    return handleError(error.message)
   }
 }
