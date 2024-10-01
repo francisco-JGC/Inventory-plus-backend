@@ -2,13 +2,14 @@ import { User } from '../../entities/user/user.entity'
 import { AppDataSource } from '../../config/database.config'
 import { getRoleByName } from '../role.controller'
 import { createUser } from '../user.controller'
+import { handleError, handleSuccess } from '../types'
 
 export const createDefaultUsers = async () => {
   try {
     const defaultUsers = [
       {
         email: 'admin@admin.com',
-        password: '1234',
+        password: '12345678',
         username: 'admin',
         rolename: 'admin'
       }
@@ -27,7 +28,10 @@ export const createDefaultUsers = async () => {
         }
       }
     }
-  } catch (error) {
+
+    return handleSuccess({})
+  } catch (error: any) {
     console.error({ error })
+    return handleError(error.message)
   }
 }
