@@ -1,7 +1,14 @@
 import { Router } from 'express'
-import { createCategory } from '../controllers/category.controller'
+import {
+  createCategory,
+  getCategories
+} from '../controllers/category.controller'
 
 const router = Router()
+
+router.get('/', async (_req, res) => {
+  return res.json(await getCategories())
+})
 
 router.post('/create', async (req, res) => {
   const { name, description } = req.body

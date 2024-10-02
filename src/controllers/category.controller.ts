@@ -1,6 +1,11 @@
 import { AppDataSource } from '../config/database.config'
 import { Category } from '../entities/categories/category.entity'
-import type { IHandleResponseController } from './types'
+import {
+  handleError,
+  handleNotFound,
+  handleSuccess,
+  type IHandleResponseController
+} from './types'
 import {
   ICreateCategory,
   ICategoryResponse
@@ -16,17 +21,17 @@ export const createCategory = async ({
       description
     })
 
+    const ifExistCategory = await getCategoryByName(name)
+
+    if (ifExistCategory.success) {
+      return handleNotFound('Ya existe una categoria con este mismo nombre')
+    }
+
     await AppDataSource.getRepository(Category).save(category)
 
-    return {
-      data: category,
-      success: true
-    }
+    return handleSuccess(category)
   } catch (error: any) {
-    return {
-      message: error.message,
-      success: false
-    }
+    return handleError(error.message)
   }
 }
 
@@ -36,15 +41,9 @@ export const getCategories = async (): Promise<
   try {
     const categories = await AppDataSource.getRepository(Category).find()
 
-    return {
-      data: categories,
-      success: true
-    }
+    return handleSuccess(categories)
   } catch (error: any) {
-    return {
-      message: error.message,
-      success: false
-    }
+    return handleError(error.message)
   }
 }
 
@@ -57,20 +56,11 @@ export const getCategoryByName = async (
     })
 
     if (!category) {
-      return {
-        message: 'Esta categoria no existe',
-        success: false
-      }
+      return handleNotFound('La categoria que esta buscando, no existe')
     }
 
-    return {
-      data: category,
-      success: true
-    }
+    return handleSuccess(category)
   } catch (error: any) {
-    return {
-      message: error.message,
-      success: false
-    }
+    return handleError(error.message)
   }
 }
