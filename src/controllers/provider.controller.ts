@@ -18,8 +18,9 @@ export const createProvider = async (
       return handleNotFound('Ya existe un proveedor con ese nombre')
     }
 
-    const createdProvider =
-      AppDataSource.getRepository(Provider).create(providerObj)
+    const createdProvider = AppDataSource.getRepository(Provider).create({
+      ...providerObj
+    })
 
     const provider =
       await AppDataSource.getRepository(Provider).save(createdProvider)
