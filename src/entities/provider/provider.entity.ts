@@ -13,16 +13,16 @@ export class Provider {
   id: number
 
   @Column()
-  provider_name: string
+  name: string
 
   @Column()
-  contact_email: string
+  email: string
 
   @Column()
-  phone_number: string
+  phone: string
 
-  @Column({ nullable: true })
-  address?: string
+  @Column()
+  address: string
 
   @CreateDateColumn()
   created_at: Date
