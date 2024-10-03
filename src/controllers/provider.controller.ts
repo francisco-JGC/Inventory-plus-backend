@@ -36,7 +36,8 @@ export const getProviderByName = async (
 ): Promise<IHandleResponseController<IProviderResponse>> => {
   try {
     const providerExist = await AppDataSource.getRepository(Provider).findOne({
-      where: { name }
+      where: { name },
+      relations: ['products']
     })
 
     if (!providerExist) {

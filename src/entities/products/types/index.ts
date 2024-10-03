@@ -1,6 +1,7 @@
 export interface ICreateProduct {
   product_name: string
   price: number
+  provider_name?: string
   description?: string
   category_name: string
   discount?: number

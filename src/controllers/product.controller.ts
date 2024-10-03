@@ -1,8 +1,10 @@
 import { AppDataSource } from '../config/database.config'
 import { Product } from '../entities/products/product.entity'
-import type { IHandleResponseController } from './types'
+import { handleNotFound, type IHandleResponseController } from './types'
 import { ICreateProduct, IProductResponse } from '../entities/products/types'
 import { getCategoryByName } from './category.controller'
+import { getProviderByName } from './provider.controller'
+import { Provider } from '../entities/provider/provider.entity'
 
 export const createProduct = async (
   product: ICreateProduct
@@ -16,13 +18,29 @@ export const createProduct = async (
         success: false
       }
     }
+    const provider = await getProviderByName(product.provider_name as string)
+
+    if (!provider.success) {
+      return handleNotFound('No se encontro el proveedor de este producto')
+    }
 
     const newProduct = AppDataSource.getRepository(Product).create({
       ...product,
-      category: category.data
+      category: category.data,
+      provider: provider.data
     })
 
-    await AppDataSource.getRepository(Product).save(newProduct)
+    const createdProduct =
+      await AppDataSource.getRepository(Product).save(newProduct)
+
+    if (provider.data && !provider.data.products) {
+      provider.data.products = []
+    }
+
+    if (provider.data) {
+      provider?.data.products.push(createdProduct)
+      await AppDataSource.getRepository(Provider).save(provider.data)
+    }
 
     return {
       data: {
