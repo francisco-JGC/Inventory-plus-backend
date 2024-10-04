@@ -4,9 +4,11 @@ import {
   handleError,
   handleNotFound,
   handleSuccess,
+  IPagination,
   type IHandleResponseController
 } from './types'
 import { ICreateProvider, IProviderResponse } from '../entities/provider/types'
+import { ILike } from 'typeorm'
 
 export const createProvider = async (
   providerObj: ICreateProvider
@@ -62,4 +64,37 @@ export const getAllProviders = async (): Promise<
   }
 }
 
-export const getPaginationProvider = async () => {}
+export const getPaginationProvider = async ({
+  filter,
+  page,
+  limit
+}: IPagination): Promise<IHandleResponseController> => {
+  try {
+    if (isNaN(page) || isNaN(limit)) {
+      return handleNotFound('Numero de pagina o limite son valores invalidos')
+    }
+
+    const providers = await AppDataSource.getRepository(Provider).find({
+      where: { name: ILike(`%${filter ? filter : ''}%`) },
+      relations: ['products'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' }
+    })
+
+    const formatedProvider = providers.map((provider) => {
+      return {
+        name: provider.name,
+        email: provider.email,
+        address: provider.address,
+        product_length: provider.products.length,
+        created_at: provider.created_at,
+        phone: provider.phone
+      }
+    })
+
+    return handleSuccess(formatedProvider)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}

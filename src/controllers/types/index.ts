@@ -35,3 +35,10 @@ export const handleNotFound = <T>(
     message: message || 'Dato no encontrado'
   }
 }
+
+// PAGINATION
+export interface IPagination {
+  filter?: string
+  page: number
+  limit: number
+}
