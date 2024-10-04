@@ -84,6 +84,7 @@ export const getPaginationProvider = async ({
 
     const formatedProvider = providers.map((provider) => {
       return {
+        id: provider.id,
         name: provider.name,
         email: provider.email,
         address: provider.address,
@@ -94,6 +95,26 @@ export const getPaginationProvider = async ({
     })
 
     return handleSuccess(formatedProvider)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const deleteProviderById = async (
+  id: number
+): Promise<IHandleResponseController<IProviderResponse>> => {
+  try {
+    const provider = await AppDataSource.getRepository(Provider).findOne({
+      where: { id }
+    })
+
+    if (!provider) {
+      return handleNotFound('Proveedor no encontrado')
+    }
+
+    return handleSuccess(
+      await AppDataSource.getRepository(Provider).remove(provider)
+    )
   } catch (error: any) {
     return handleError(error.message)
   }
