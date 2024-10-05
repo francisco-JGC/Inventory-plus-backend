@@ -44,7 +44,7 @@ export const login = async ({
     }
 
     const token = sign(
-      { id: user.id, role: user.roles[0].name },
+      { id: user.id, role: user?.roles[0]?.name || '' },
       process.env.JWT_SECRET as string,
       {
         expiresIn: '1d'
@@ -53,7 +53,10 @@ export const login = async ({
 
     return {
       data: {
-        token
+        token,
+        username: user.username,
+        email: user.email,
+        role: user?.roles[0]?.name || ''
       },
       success: true
     }

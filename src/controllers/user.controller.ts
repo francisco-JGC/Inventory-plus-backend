@@ -223,7 +223,7 @@ export const getPaginationUser = async ({
     const formatedUser = users.map((user) => {
       return {
         ...user,
-        role: user.roles[0].label
+        role: user?.roles[0]?.label || 'Sin asignar'
       }
     })
 

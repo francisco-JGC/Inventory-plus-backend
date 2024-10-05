@@ -24,4 +24,7 @@ export interface ILogin {
 
 export interface ILoginResponse {
   token: string
+  username: string
+  email: string
+  role: string
 }
