@@ -177,7 +177,7 @@ export const deleteUserById = async (
   try {
     const user = await AppDataSource.getRepository(User).findOne({
       where: { id },
-      relations: ['products']
+      relations: ['roles']
     })
 
     if (!user) {
@@ -214,7 +214,7 @@ export const getPaginationUser = async ({
 
     const users = await AppDataSource.getRepository(User).find({
       where: { username: ILike(`%${filter ? filter : ''}%`) },
-      relations: ['products'],
+      relations: ['roles'],
       skip: (page - 1) * limit,
       take: limit,
       order: { created_at: 'DESC' }
@@ -223,7 +223,7 @@ export const getPaginationUser = async ({
     const formatedUser = users.map((user) => {
       return {
         ...user,
-        role: user.roles[0]
+        role: user.roles[0].label
       }
     })
 
