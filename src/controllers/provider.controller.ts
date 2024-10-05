@@ -139,3 +139,26 @@ export const getProviderById = async (
     return handleError(error.message)
   }
 }
+
+export const updateProviderById = async (
+  provider: Provider,
+  id: number
+): Promise<IHandleResponseController<IProviderResponse>> => {
+  try {
+    const providerExist = await AppDataSource.getRepository(Provider).findOne({
+      where: { id }
+    })
+
+    if (!providerExist) {
+      return handleNotFound('Proveedor no encontrado')
+    }
+
+    AppDataSource.getRepository(Provider).merge(providerExist, provider)
+    const updatedProvider =
+      await AppDataSource.getRepository(Provider).save(providerExist)
+
+    return handleSuccess(updatedProvider)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}

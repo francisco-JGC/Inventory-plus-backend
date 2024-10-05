@@ -4,7 +4,8 @@ import {
   createProvider,
   getPaginationProvider,
   deleteProviderById,
-  getProviderById
+  getProviderById,
+  updateProviderById
 } from '../controllers/provider.controller'
 
 const router = Router()
@@ -38,6 +39,10 @@ router.post('/delete', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   res.json(await getProviderById(Number(req.params.id)))
+})
+
+router.post('/update/:id', async (req, res) => {
+  res.json(await updateProviderById(req.body, Number(req.params.id)))
 })
 
 export default router
