@@ -23,7 +23,8 @@ export const login = async ({
 
   try {
     const user = await AppDataSource.getRepository(User).findOne({
-      where: { email }
+      where: { email },
+      relations: ['roles']
     })
 
     if (!user) {
@@ -42,9 +43,13 @@ export const login = async ({
       }
     }
 
-    const token = sign({ id: user.id }, process.env.JWT_SECRET as string, {
-      expiresIn: '1d'
-    })
+    const token = sign(
+      { id: user.id, role: user.roles[0].name },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: '1d'
+      }
+    )
 
     return {
       data: {

@@ -5,6 +5,7 @@ import {
   handleError,
   handleNotFound,
   handleSuccess,
+  IPagination,
   type IHandleResponseController
 } from './types'
 import {
@@ -14,6 +15,7 @@ import {
 } from '../entities/user/types'
 import { getRoleByName } from './role.controller'
 import { Role } from '../entities/role/role.entity'
+import { ILike } from 'typeorm'
 
 export const createUser = async ({
   username,
@@ -142,6 +144,90 @@ export const assignRoleToUser = async ({
     const response = await AppDataSource.getRepository(User).save(user)
 
     return handleSuccess(response)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const updateUserById = async (
+  user: User,
+  id: number
+): Promise<IHandleResponseController<IResponseUser>> => {
+  try {
+    const userExists = await AppDataSource.getRepository(User).findOne({
+      where: { id }
+    })
+
+    if (!userExists) {
+      return handleNotFound('Proveedor no encontrado')
+    }
+
+    AppDataSource.getRepository(User).merge(userExists, user)
+    const updatedUser = await AppDataSource.getRepository(User).save(userExists)
+
+    return handleSuccess(updatedUser)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const deleteUserById = async (
+  id: number
+): Promise<IHandleResponseController<IResponseUser>> => {
+  try {
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: { id },
+      relations: ['products']
+    })
+
+    if (!user) {
+      return handleNotFound('Proveedor no encontrado')
+    }
+
+    return handleSuccess(await AppDataSource.getRepository(User).remove(user))
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const getAllUsers = async (): Promise<
+  IHandleResponseController<IResponseUser[]>
+> => {
+  try {
+    const users = await AppDataSource.getRepository(User).find()
+
+    return handleSuccess(users)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const getPaginationUser = async ({
+  filter,
+  page,
+  limit
+}: IPagination): Promise<IHandleResponseController> => {
+  try {
+    if (isNaN(page) || isNaN(limit)) {
+      return handleNotFound('Numero de pagina o limite son valores invalidos')
+    }
+
+    const users = await AppDataSource.getRepository(User).find({
+      where: { username: ILike(`%${filter ? filter : ''}%`) },
+      relations: ['products'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' }
+    })
+
+    const formatedUser = users.map((user) => {
+      return {
+        ...user,
+        role: user.roles[0]
+      }
+    })
+
+    return handleSuccess(formatedUser)
   } catch (error: any) {
     return handleError(error.message)
   }

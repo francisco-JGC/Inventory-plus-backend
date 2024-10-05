@@ -1,35 +1,48 @@
 import { Router } from 'express'
-import { createUser, findUserByEmail } from '../controllers/user.controller'
-import { isAuth } from '../middlewares/isAuth.middleware'
+import {
+  createUser,
+  deleteUserById,
+  findUserByEmail,
+  updateUserById,
+  getPaginationUser,
+  getAllUsers
+} from '../controllers/user.controller'
 
 const router = Router()
 
-router.post('/', isAuth, async (req, res) => {
-  const { username, email, password } = req.body
-
-  const user = await createUser({ username, email, password })
-
-  if (!user.success) {
-    return res.status(400).json({
-      message: user.message
-    })
-  }
-
-  return res.status(201).json(user.data)
+router.get('/', async (_req, res) => {
+  return res.json(await getAllUsers())
 })
 
-router.post('/find', isAuth, async (req, res) => {
-  const { email } = req.body
+router.post('/create', async (req, res) => {
+  return res.json(await createUser(req.body))
+})
 
-  const user = await findUserByEmail({ email })
+router.get('/:page/:limit/:filter?', async (req, res) => {
+  const { page, limit, filter } = req.params
 
-  if (!user.success) {
-    return res.status(404).json({
-      message: user.message
+  const pageNumber = parseInt(page, 10)
+  const limitNumber = parseInt(limit, 10)
+
+  return res.json(
+    await getPaginationUser({
+      page: pageNumber,
+      limit: limitNumber,
+      filter
     })
-  }
+  )
+})
 
-  return res.status(200).json(user.data)
+router.post('/delete', async (req, res) => {
+  res.json(await deleteUserById(req.body.id))
+})
+
+router.get('/:email', async (req, res) => {
+  res.json(await findUserByEmail({ email: req.params.email }))
+})
+
+router.post('/update/:id', async (req, res) => {
+  res.json(await updateUserById(req.body, Number(req.params.id)))
 })
 
 export default router

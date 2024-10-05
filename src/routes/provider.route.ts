@@ -7,18 +7,19 @@ import {
   getProviderById,
   updateProviderById
 } from '../controllers/provider.controller'
+import { isAuth } from '../middlewares/isAuth.middleware'
 
 const router = Router()
 
-router.get('/', async (_req, res) => {
+router.get('/', isAuth, async (_req, res) => {
   return res.json(await getAllProviders())
 })
 
-router.post('/create', async (req, res) => {
+router.post('/create', isAuth, async (req, res) => {
   return res.json(await createProvider(req.body))
 })
 
-router.get('/:page/:limit/:filter?', async (req, res) => {
+router.get('/:page/:limit/:filter?', isAuth, async (req, res) => {
   const { page, limit, filter } = req.params
 
   const pageNumber = parseInt(page, 10)
@@ -33,15 +34,15 @@ router.get('/:page/:limit/:filter?', async (req, res) => {
   )
 })
 
-router.post('/delete', async (req, res) => {
+router.post('/delete', isAuth, async (req, res) => {
   res.json(await deleteProviderById(req.body.id))
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', isAuth, async (req, res) => {
   res.json(await getProviderById(Number(req.params.id)))
 })
 
-router.post('/update/:id', async (req, res) => {
+router.post('/update/:id', isAuth, async (req, res) => {
   res.json(await updateProviderById(req.body, Number(req.params.id)))
 })
 
