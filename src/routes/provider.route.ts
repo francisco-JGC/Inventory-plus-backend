@@ -3,7 +3,8 @@ import {
   getAllProviders,
   createProvider,
   getPaginationProvider,
-  deleteProviderById
+  deleteProviderById,
+  getProviderById
 } from '../controllers/provider.controller'
 
 const router = Router()
@@ -33,6 +34,10 @@ router.get('/:page/:limit/:filter?', async (req, res) => {
 
 router.post('/delete', async (req, res) => {
   res.json(await deleteProviderById(req.body.id))
+})
+
+router.get('/:id', async (req, res) => {
+  res.json(await getProviderById(Number(req.params.id)))
 })
 
 export default router

@@ -105,7 +105,8 @@ export const deleteProviderById = async (
 ): Promise<IHandleResponseController<IProviderResponse>> => {
   try {
     const provider = await AppDataSource.getRepository(Provider).findOne({
-      where: { id }
+      where: { id },
+      relations: ['products']
     })
 
     if (!provider) {
@@ -115,6 +116,25 @@ export const deleteProviderById = async (
     return handleSuccess(
       await AppDataSource.getRepository(Provider).remove(provider)
     )
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const getProviderById = async (
+  id: number
+): Promise<IHandleResponseController<IProviderResponse>> => {
+  try {
+    const provider = await AppDataSource.getRepository(Provider).findOne({
+      where: { id },
+      relations: ['products']
+    })
+
+    if (!provider) {
+      return handleNotFound('Proveedor no encontrado')
+    }
+
+    return handleSuccess(provider)
   } catch (error: any) {
     return handleError(error.message)
   }
