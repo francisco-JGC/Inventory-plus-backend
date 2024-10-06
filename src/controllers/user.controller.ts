@@ -109,6 +109,30 @@ export const findUserByEmail = async ({
   }
 }
 
+export const getUserById = async (
+  id: number
+): Promise<IHandleResponseController<IResponseUser>> => {
+  try {
+    const user = await AppDataSource.getRepository(User).findOne({
+      where: { id },
+      relations: ['roles']
+    })
+
+    if (!user) {
+      return handleNotFound('Usuario no encontrado')
+    }
+
+    return handleSuccess({
+      username: user.username,
+      email: user.email,
+      id: user.id,
+      roles: user.roles
+    })
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
 export const assignRoleToUser = async ({
   userId,
   role_name

@@ -2,10 +2,11 @@ import { Router } from 'express'
 import {
   createUser,
   deleteUserById,
-  findUserByEmail,
+  // findUserByEmail,
   updateUserById,
   getPaginationUser,
-  getAllUsers
+  getAllUsers,
+  getUserById
 } from '../controllers/user.controller'
 
 const router = Router()
@@ -37,12 +38,17 @@ router.post('/delete', async (req, res) => {
   res.json(await deleteUserById(req.body.id))
 })
 
-router.get('/:email', async (req, res) => {
-  res.json(await findUserByEmail({ email: req.params.email }))
-})
+// router.get('/:email', async (req, res) => {
+//   console.log('email => ', req.res)
+//   res.json(await findUserByEmail({ email: req.params.email }))
+// })
 
 router.post('/update/:id', async (req, res) => {
   res.json(await updateUserById(req.body, Number(req.params.id)))
+})
+
+router.get('/:id', async (req, res) => {
+  res.json(await getUserById(Number(req.params.id)))
 })
 
 export default router
