@@ -6,7 +6,6 @@ import {
   OneToMany
 } from 'typeorm'
 import { OrderProduct } from './order-product.entity'
-import { Sales } from '../sales/sales.entity'
 
 @Entity('order')
 export class Order {
@@ -15,9 +14,6 @@ export class Order {
 
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order)
   orderProducts: OrderProduct[]
-
-  @OneToMany(() => Sales, (sales) => sales.order)
-  sales: Sales[]
 
   @Column()
   sale_status: boolean
