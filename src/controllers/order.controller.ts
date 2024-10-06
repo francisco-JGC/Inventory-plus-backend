@@ -40,6 +40,7 @@ export const createOrder = async (
       const orderProduct = new OrderProduct()
       orderProduct.order = savedOrder
       orderProduct.product = product
+      orderProduct.price = productOrder.price
       orderProduct.quantity = productOrder.quantity
 
       await orderProductRepository.save(orderProduct)

@@ -15,4 +15,7 @@ export class OrderProduct {
 
   @Column()
   quantity: number
+
+  @Column()
+  price: number
 }
