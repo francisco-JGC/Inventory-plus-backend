@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   OneToMany
 } from 'typeorm'
-import { Product } from '../products/product.entity'
+import { OrderProduct } from './order-product.entity'
 import { Sales } from '../sales/sales.entity'
 
 @Entity('order')
@@ -13,8 +13,8 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number
 
-  @OneToMany(() => Product, (product) => product.orders)
-  products: Product[]
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.order)
+  orderProducts: OrderProduct[]
 
   @OneToMany(() => Sales, (sales) => sales.order)
   sales: Sales[]
@@ -30,6 +30,12 @@ export class Order {
 
   @Column()
   total_price: number
+
+  @Column()
+  discount: number
+
+  @Column()
+  tax: number
 
   @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date

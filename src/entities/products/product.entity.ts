@@ -6,7 +6,7 @@ import {
   ManyToOne,
   OneToMany
 } from 'typeorm'
-import { Order } from '../order/order.entity'
+import { OrderProduct } from '../order/order-product.entity'
 import { Category } from '../categories/category.entity'
 import { Inventory } from '../inventory/inventory.entity'
 import { Provider } from '../provider/provider.entity'
@@ -40,8 +40,8 @@ export class Product {
   @Column()
   low_stock_limit: number
 
-  @ManyToOne(() => Order, (order) => order.products, { nullable: true })
-  orders?: Order
+  @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
+  orderProducts: OrderProduct[]
 
   @OneToMany(() => Inventory, (inventory) => inventory.product)
   inventory: Inventory[]
