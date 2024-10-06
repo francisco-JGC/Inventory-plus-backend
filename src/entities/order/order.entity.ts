@@ -28,7 +28,7 @@ export class Order {
   @Column({ nullable: true })
   phone_number?: string
 
-  @Column()
+  @Column({ type: 'float' })
   total_price: number
 
   @Column()
