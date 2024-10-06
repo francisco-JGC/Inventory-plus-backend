@@ -16,12 +16,6 @@ export class Sales {
   order: Order
 
   @Column()
-  payment_method: string
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  total_amount: number
-
-  @Column()
   sale_status: 'completed' | 'pending'
 
   @Column({ nullable: true })
