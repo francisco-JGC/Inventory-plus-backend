@@ -14,3 +14,9 @@ export interface IProductResponse extends ICreateProduct {
   id: number
   created_at: Date
 }
+export interface IProductInvoice {
+  id: number
+  product_name: string
+  price: number
+  stock: number
+}

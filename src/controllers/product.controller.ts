@@ -1,7 +1,15 @@
 import { AppDataSource } from '../config/database.config'
 import { Product } from '../entities/products/product.entity'
-import { handleNotFound, type IHandleResponseController } from './types'
-import { ICreateProduct, IProductResponse } from '../entities/products/types'
+import {
+  handleNotFound,
+  handleSuccess,
+  type IHandleResponseController
+} from './types'
+import {
+  ICreateProduct,
+  IProductInvoice,
+  IProductResponse
+} from '../entities/products/types'
 import { getCategoryByName } from './category.controller'
 import { getProviderByName } from './provider.controller'
 import { Provider } from '../entities/provider/provider.entity'
@@ -57,8 +65,8 @@ export const createProduct = async (
   }
 }
 
-export const getProducts = async (): Promise<
-  IHandleResponseController<IProductResponse[]>
+export const getProductsInvoice = async (): Promise<
+  IHandleResponseController<IProductInvoice[]>
 > => {
   try {
     const products = await AppDataSource.getRepository(Product).find()
@@ -70,13 +78,7 @@ export const getProducts = async (): Promise<
       }
     }
 
-    return {
-      data: products.map((product) => ({
-        ...product,
-        category_name: product.category.name
-      })),
-      success: true
-    }
+    return handleSuccess(products)
   } catch (error: any) {
     return {
       message: error.message,
