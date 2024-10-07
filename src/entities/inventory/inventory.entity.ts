@@ -3,7 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne
+  ManyToMany,
+  JoinTable
 } from 'typeorm'
 import { Product } from '../products/product.entity'
 
@@ -12,8 +13,9 @@ export class Inventory {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToOne(() => Product, (product) => product.inventory)
-  product: Product
+  @ManyToMany(() => Product, (product) => product.inventories)
+  @JoinTable()
+  products: Product[]
 
   @Column({ type: 'int' })
   quantity: number

@@ -4,7 +4,8 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  ManyToMany
 } from 'typeorm'
 import { OrderProduct } from '../order/order-product.entity'
 import { Category } from '../categories/category.entity'
@@ -43,8 +44,8 @@ export class Product {
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
   orderProducts: OrderProduct[]
 
-  @OneToMany(() => Inventory, (inventory) => inventory.product)
-  inventory: Inventory[]
+  @ManyToMany(() => Inventory, (inventory) => inventory.products)
+  inventories: Inventory[]
 
   @ManyToOne(() => Provider, (provider) => provider.products)
   provider: Provider
