@@ -3,12 +3,15 @@ import {
   handleError,
   handleNotFound,
   handleSuccess,
-  IHandleResponseController
+  IHandleResponseController,
+  IPagination
 } from './types'
 import { ICreateOrder } from '../entities/order/types'
 import { Order } from '../entities/order/order.entity'
 import { OrderProduct } from '../entities/order/order-product.entity'
 import { Product } from '../entities/products/product.entity'
+import { ILike } from 'typeorm'
+import { generatePurchaseCode } from '../utils/generatePurchaseCode'
 
 export const createOrder = async (
   order: ICreateOrder
@@ -49,7 +52,46 @@ export const createOrder = async (
       await productRepository.save(product)
     }
 
+    savedOrder.code = generatePurchaseCode(savedOrder.id)
+    await orderRepository.save(savedOrder)
+
     return handleSuccess(savedOrder)
+  } catch (error: any) {
+    return handleError(error)
+  }
+}
+
+export const getPaginationOrders = async ({
+  filter,
+  page,
+  limit
+}: IPagination): Promise<IHandleResponseController> => {
+  try {
+    if (isNaN(page) || isNaN(limit)) {
+      return handleNotFound('Numero de pagina o limite son valores invalidos')
+    }
+
+    const orders = await AppDataSource.getRepository(Order).find({
+      where: { code: ILike(`%${filter ? filter : ''}%`) },
+      relations: ['orderProducts', 'orderProducts.product'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' }
+    })
+
+    const formatedOrders = orders.map((order) => {
+      return {
+        id: order.id,
+        created_at: order.created_at,
+        total: order.total_price,
+        total_products: order.orderProducts.length,
+        code: order.code || 'xxx',
+        client_name: order.client_name || 'xxx',
+        sale_status: order.sale_status
+      }
+    })
+
+    return handleSuccess(formatedOrders)
   } catch (error: any) {
     return handleError(error.message)
   }

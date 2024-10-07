@@ -30,6 +30,9 @@ export class Order {
   @Column()
   discount: number
 
+  @Column({ default: '' })
+  code: string
+
   @Column()
   tax: number
 
