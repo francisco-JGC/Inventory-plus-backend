@@ -2,26 +2,22 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  ManyToMany,
-  JoinTable
+  CreateDateColumn
 } from 'typeorm'
-import { Product } from '../products/product.entity'
 
 @Entity('inventory')
 export class Inventory {
   @PrimaryGeneratedColumn()
   id: number
 
-  @ManyToMany(() => Product, (product) => product.inventories)
-  @JoinTable()
-  products: Product[]
+  @Column()
+  name: string
 
   @Column({ type: 'int' })
-  quantity: number
+  product_quantity: number
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  warehouse_location: string
+  @Column()
+  inventory_value: number
 
   @CreateDateColumn()
   last_updated: Date

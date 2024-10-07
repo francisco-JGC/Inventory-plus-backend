@@ -13,6 +13,7 @@ import {
 import { getCategoryByName } from './category.controller'
 import { getProviderByName } from './provider.controller'
 import { Provider } from '../entities/provider/provider.entity'
+// import { Inventory } from '../entities/inventory/inventory.entity'
 
 export const createProduct = async (
   product: ICreateProduct
