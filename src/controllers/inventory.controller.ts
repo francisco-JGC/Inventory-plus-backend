@@ -12,7 +12,7 @@ export const createDefaultInventory =
     try {
       const existInventory = await getDefaultInventory()
 
-      if (existInventory.success) {
+      if (existInventory) {
         return handleNotFound('El inventario ya existe')
       }
 
@@ -29,19 +29,10 @@ export const createDefaultInventory =
     }
   }
 
-export const getDefaultInventory =
-  async (): Promise<IHandleResponseController> => {
-    try {
-      const inventory = await AppDataSource.getRepository(Inventory).find({
-        where: { name: 'default' }
-      })
+export const getDefaultInventory = async (): Promise<Inventory> => {
+  const inventory = await AppDataSource.getRepository(Inventory).findOne({
+    where: { name: 'default' }
+  })
 
-      if (inventory) {
-        return handleNotFound('Inventario no encontrado')
-      }
-
-      return handleSuccess(inventory)
-    } catch (error: any) {
-      return handleError(error.message)
-    }
-  }
+  return inventory || ({} as any)
+}

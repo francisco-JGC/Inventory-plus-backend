@@ -13,7 +13,8 @@ import {
 import { getCategoryByName } from './category.controller'
 import { getProviderByName } from './provider.controller'
 import { Provider } from '../entities/provider/provider.entity'
-// import { Inventory } from '../entities/inventory/inventory.entity'
+import { getDefaultInventory } from './inventory.controller'
+import { Inventory } from '../entities/inventory/inventory.entity'
 
 export const createProduct = async (
   product: ICreateProduct
@@ -28,6 +29,7 @@ export const createProduct = async (
       }
     }
     const provider = await getProviderByName(product.provider_name as string)
+    const inventory = await getDefaultInventory()
 
     if (!provider.success) {
       return handleNotFound('No se encontro el proveedor de este producto')
@@ -49,6 +51,10 @@ export const createProduct = async (
     if (provider.data) {
       provider?.data.products.push(createdProduct)
       await AppDataSource.getRepository(Provider).save(provider.data)
+      inventory.inventory_value += product.price
+      inventory.product_quantity += 1
+
+      AppDataSource.getRepository(Inventory).save(inventory)
     }
 
     return {
