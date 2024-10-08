@@ -1,8 +1,11 @@
 import { Router } from 'express'
 import {
   createProduct,
+  deleteProductById,
   getPaginationProduct,
-  getProductsInvoice
+  getProductsInvoice,
+  replenishStock,
+  updateProductById
 } from '../controllers/product.controller'
 import { isAuth } from '../middlewares/isAuth.middleware'
 
@@ -29,5 +32,37 @@ router.get('/:page/:limit/:filter?', isAuth, async (req, res) => {
       filter
     })
   )
+})
+
+router.delete('/delete/:id', isAuth, async (req, res) => {
+  const { id } = req.params
+  const productId = parseInt(id, 10)
+
+  const result = await deleteProductById(productId)
+  return res.json(result)
+})
+
+router.patch('/replenish-stock/:id', isAuth, async (req, res) => {
+  const { id } = req.params
+  const { amount } = req.body
+  const productId = parseInt(id, 10)
+
+  if (!amount || isNaN(amount)) {
+    return res
+      .status(400)
+      .json({ error: 'La cantidad es requerida y debe ser un número' })
+  }
+
+  const result = await replenishStock(productId, parseInt(amount, 10))
+  return res.json(result)
+})
+
+router.put('/update/:id', isAuth, async (req, res) => {
+  const { id } = req.params
+  const productId = parseInt(id, 10)
+  const productData = req.body
+
+  const result = await updateProductById(productData, productId)
+  return res.json(result)
 })
 export default router

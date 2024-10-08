@@ -18,6 +18,7 @@ import { Provider } from '../entities/provider/provider.entity'
 import { getDefaultInventory } from './inventory.controller'
 import { Inventory } from '../entities/inventory/inventory.entity'
 import { ILike } from 'typeorm'
+import { Category } from '../entities/categories/category.entity'
 
 export const createProduct = async (
   product: ICreateProduct
@@ -188,6 +189,64 @@ export const replenishStock = async (
     return handleSuccess(
       await AppDataSource.getRepository(Product).save(product)
     )
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const updateProductById = async (
+  productData: ICreateProduct,
+  id: number
+): Promise<IHandleResponseController<Product>> => {
+  try {
+    const productRepository = AppDataSource.getRepository(Product)
+    const providerRepository = AppDataSource.getRepository(Provider)
+    const categoryRepository = AppDataSource.getRepository(Category)
+
+    const productExist = await productRepository.findOne({
+      where: { id },
+      relations: ['provider', 'category']
+    })
+
+    if (!productExist) {
+      return handleNotFound('Producto no encontrado')
+    }
+
+    if (productData.provider_name) {
+      const provider = await providerRepository.findOne({
+        where: { name: productData.provider_name }
+      })
+
+      if (!provider) {
+        return handleNotFound('Proveedor no encontrado')
+      }
+
+      productExist.provider = provider
+    }
+
+    if (productData.category_name) {
+      const category = await categoryRepository.findOne({
+        where: { name: productData.category_name }
+      })
+
+      if (!category) {
+        return handleNotFound('Categoría no encontrada')
+      }
+
+      productExist.category = category
+    }
+
+    productExist.product_name = productData.product_name
+    productExist.price = productData.price
+    productExist.description = productData.description
+    productExist.discount = productData.discount
+    productExist.stock = productData.stock
+    productExist.status = productData.status
+    productExist.low_stock_limit = productData.low_stock_limit
+
+    const updatedProduct = await productRepository.save(productExist)
+
+    return handleSuccess(updatedProduct)
   } catch (error: any) {
     return handleError(error.message)
   }
