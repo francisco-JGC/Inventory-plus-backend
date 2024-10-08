@@ -15,26 +15,7 @@ router.post('/create', isAuth, async (req, res) => {
   return res.json(await createProduct(req.body))
 })
 
-router.get('/', isAuth, async (_req, res) => {
-  return res.json(await getProductsInvoice())
-})
-
-router.get('/:page/:limit/:filter?', isAuth, async (req, res) => {
-  const { page, limit, filter } = req.params
-
-  const pageNumber = parseInt(page, 10)
-  const limitNumber = parseInt(limit, 10)
-
-  return res.json(
-    await getPaginationProduct({
-      page: pageNumber,
-      limit: limitNumber,
-      filter
-    })
-  )
-})
-
-router.get('/delete/:id', isAuth, async (req, res) => {
+router.get('/delete-product/:id', isAuth, async (req, res) => {
   const { id } = req.params
   const productId = parseInt(id, 10)
 
@@ -64,5 +45,24 @@ router.post('/update/:id', isAuth, async (req, res) => {
 
   const result = await updateProductById(productData, productId)
   return res.json(result)
+})
+
+router.get('/', isAuth, async (_req, res) => {
+  return res.json(await getProductsInvoice())
+})
+
+router.get('/:page/:limit/:filter?', isAuth, async (req, res) => {
+  const { page, limit, filter } = req.params
+
+  const pageNumber = parseInt(page, 10)
+  const limitNumber = parseInt(limit, 10)
+
+  return res.json(
+    await getPaginationProduct({
+      page: pageNumber,
+      limit: limitNumber,
+      filter
+    })
+  )
 })
 export default router
