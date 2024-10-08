@@ -1,6 +1,7 @@
 import { AppDataSource } from '../config/database.config'
 import { Product } from '../entities/products/product.entity'
 import {
+  handleError,
   handleNotFound,
   handleSuccess,
   type IHandleResponseController
@@ -91,5 +92,21 @@ export const getProductsInvoice = async (): Promise<
       message: error.message,
       success: false
     }
+  }
+}
+
+export const getAlertLowStockFromProduct = async (): Promise<
+  IHandleResponseController<Product[]>
+> => {
+  try {
+    const products = await AppDataSource.getRepository(Product).find()
+
+    const productsWithLowStock = products.filter(
+      (product) => product.low_stock_limit > product.stock
+    )
+
+    return handleSuccess(productsWithLowStock)
+  } catch (error: any) {
+    return handleError(error.message)
   }
 }
