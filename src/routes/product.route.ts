@@ -34,7 +34,7 @@ router.get('/:page/:limit/:filter?', isAuth, async (req, res) => {
   )
 })
 
-router.delete('/delete/:id', isAuth, async (req, res) => {
+router.get('/delete/:id', isAuth, async (req, res) => {
   const { id } = req.params
   const productId = parseInt(id, 10)
 
@@ -42,7 +42,7 @@ router.delete('/delete/:id', isAuth, async (req, res) => {
   return res.json(result)
 })
 
-router.patch('/replenish-stock/:id', isAuth, async (req, res) => {
+router.post('/replenish-stock/:id', isAuth, async (req, res) => {
   const { id } = req.params
   const { amount } = req.body
   const productId = parseInt(id, 10)
@@ -57,7 +57,7 @@ router.patch('/replenish-stock/:id', isAuth, async (req, res) => {
   return res.json(result)
 })
 
-router.put('/update/:id', isAuth, async (req, res) => {
+router.post('/update/:id', isAuth, async (req, res) => {
   const { id } = req.params
   const productId = parseInt(id, 10)
   const productData = req.body
