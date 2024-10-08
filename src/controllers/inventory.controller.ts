@@ -15,7 +15,7 @@ export const createDefaultInventory =
     try {
       const existInventory = await getDefaultInventory()
 
-      if (existInventory) {
+      if (existInventory.id) {
         return handleNotFound('El inventario ya existe')
       }
 

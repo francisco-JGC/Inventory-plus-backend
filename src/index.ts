@@ -6,6 +6,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { AppDataSource } from './config/database.config'
 import { createDefaultRoles } from './controllers/initializers/role.initializer'
+import { createDefaultInventory } from './controllers/inventory.controller'
 
 const app = express()
 
@@ -36,7 +37,7 @@ async function main() {
 }
 
 async function runInitializers() {
-  return await Promise.all([createDefaultRoles()])
+  return await Promise.all([createDefaultRoles(), createDefaultInventory()])
 }
 
 main()

@@ -54,12 +54,15 @@ export const createProduct = async (
 
     if (provider.data) {
       provider?.data.products.push(createdProduct)
-      await AppDataSource.getRepository(Provider).save(provider.data)
-      inventory.inventory_value += product.price
-      inventory.product_quantity += 1
+      console.log({ inventory })
 
-      AppDataSource.getRepository(Inventory).save(inventory)
+      await AppDataSource.getRepository(Provider).save(provider.data)
     }
+
+    inventory.inventory_value += product.price
+    inventory.product_quantity += 1
+
+    await AppDataSource.getRepository(Inventory).save(inventory)
 
     return {
       data: {
@@ -158,15 +161,24 @@ export const deleteProductById = async (
     const product = await AppDataSource.getRepository(Product).findOne({
       where: { id }
     })
+    const inventory = await getDefaultInventory()
 
     if (!product) {
       return handleNotFound('Producto no encontrado')
     }
 
+    console.log(inventory)
+
+    inventory.inventory_value -= product.price
+    inventory.product_quantity -= 1
+
+    await AppDataSource.getRepository(Inventory).save(inventory)
+
     return handleSuccess(
       await AppDataSource.getRepository(Product).remove(product)
     )
   } catch (error: any) {
+    console.log(error.message)
     return handleError(error.message)
   }
 }

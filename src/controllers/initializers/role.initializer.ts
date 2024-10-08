@@ -1,6 +1,5 @@
 import { AppDataSource } from '../../config/database.config'
 import { Role } from '../../entities/role/role.entity'
-import { createDefaultInventory } from '../inventory.controller'
 import { handleNotFound, handleSuccess } from '../types'
 import { createDefaultUsers } from './user.initializer'
 
@@ -35,7 +34,6 @@ export const createDefaultRoles = async () => {
     }
 
     await createDefaultUsers()
-    await createDefaultInventory()
     return handleSuccess('Initializer')
   } catch (error: any) {
     console.error({ error })

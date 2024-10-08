@@ -1,9 +1,4 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn
-} from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
 
 @Entity('inventory')
 export class Inventory {
@@ -18,7 +13,4 @@ export class Inventory {
 
   @Column({ default: 0 })
   inventory_value: number
-
-  @CreateDateColumn()
-  last_updated: Date
 }
