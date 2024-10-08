@@ -54,13 +54,13 @@ export const createProduct = async (
 
     if (provider.data) {
       provider?.data.products.push(createdProduct)
-      console.log({ inventory })
 
       await AppDataSource.getRepository(Provider).save(provider.data)
     }
 
-    inventory.inventory_value += product.price
-    inventory.product_quantity += 1
+    inventory.inventory_value =
+      Number(inventory.inventory_value) + Number(product.price)
+    inventory.product_quantity = Number(inventory.product_quantity) + 1
 
     await AppDataSource.getRepository(Inventory).save(inventory)
 
@@ -169,8 +169,9 @@ export const deleteProductById = async (
 
     console.log(inventory)
 
-    inventory.inventory_value -= product.price
-    inventory.product_quantity -= 1
+    inventory.inventory_value =
+      Number(inventory.inventory_value) - product.price
+    inventory.product_quantity = Number(inventory.product_quantity) - 1
 
     await AppDataSource.getRepository(Inventory).save(inventory)
 
