@@ -96,3 +96,24 @@ export const getPaginationOrders = async ({
     return handleError(error.message)
   }
 }
+
+export const changeOrderStatusSale = async (
+  id: number
+): Promise<IHandleResponseController<Order>> => {
+  try {
+    const order = await AppDataSource.getRepository(Order).findOne({
+      where: { id }
+    })
+
+    if (!order) {
+      return handleNotFound('Orden no encontrada')
+    }
+
+    order.sale_status = !order.sale_status
+
+    return handleSuccess(await AppDataSource.getRepository(Order).save(order))
+  } catch (error: any) {
+    console.log(error.message)
+    return handleError(error.message)
+  }
+}
