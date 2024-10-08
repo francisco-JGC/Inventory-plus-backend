@@ -4,6 +4,7 @@ import {
   handleError,
   handleNotFound,
   handleSuccess,
+  IPagination,
   type IHandleResponseController
 } from './types'
 import {
@@ -16,6 +17,7 @@ import { getProviderByName } from './provider.controller'
 import { Provider } from '../entities/provider/provider.entity'
 import { getDefaultInventory } from './inventory.controller'
 import { Inventory } from '../entities/inventory/inventory.entity'
+import { ILike } from 'typeorm'
 
 export const createProduct = async (
   product: ICreateProduct
@@ -106,6 +108,43 @@ export const getAlertLowStockFromProduct = async (): Promise<
     )
 
     return handleSuccess(productsWithLowStock)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const getPaginationProduct = async ({
+  filter,
+  page,
+  limit
+}: IPagination): Promise<IHandleResponseController> => {
+  try {
+    if (isNaN(page) || isNaN(limit)) {
+      return handleNotFound('Numero de pagina o limite son valores invalidos')
+    }
+
+    const products = await AppDataSource.getRepository(Product).find({
+      where: { product_name: ILike(`%${filter ? filter : ''}%`) },
+      relations: ['provider'],
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { created_at: 'DESC' }
+    })
+
+    const formatedProduct = products.map((product) => {
+      return {
+        id: product.id,
+        product_name: product.product_name,
+        stock: product.stock,
+        low_stock_limit: product.low_stock_limit,
+        status: product.status,
+        created_at: product.created_at,
+        provider_name: product.provider.name,
+        price: product.price
+      }
+    })
+
+    return handleSuccess(formatedProduct)
   } catch (error: any) {
     return handleError(error.message)
   }
