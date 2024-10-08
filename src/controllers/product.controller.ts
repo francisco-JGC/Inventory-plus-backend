@@ -149,3 +149,23 @@ export const getPaginationProduct = async ({
     return handleError(error.message)
   }
 }
+
+export const deleteProductById = async (
+  id: number
+): Promise<IHandleResponseController<Product>> => {
+  try {
+    const product = await AppDataSource.getRepository(Product).findOne({
+      where: { id }
+    })
+
+    if (!product) {
+      return handleNotFound('Producto no encontrado')
+    }
+
+    return handleSuccess(
+      await AppDataSource.getRepository(Product).remove(product)
+    )
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
