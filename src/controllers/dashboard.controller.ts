@@ -8,6 +8,8 @@ import {
   IGetSalesLastSixMonths
 } from './types/dashboard.type'
 import { Between } from 'typeorm'
+import { OrderProduct } from '../entities/order/order-product.entity'
+import { ITopProducts } from '../entities/order/types'
 
 export const getMonthlySalesInformation = async (): Promise<
   IHandleResponseController<IGetMonthlySalesInformation>
@@ -106,6 +108,43 @@ export const getSalesLastSixMonths = async (): Promise<
     }
 
     return handleSuccess(salesData)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
+
+export const getTop7Products = async (): Promise<
+  IHandleResponseController<ITopProducts[]>
+> => {
+  try {
+    const orderProductRepository = AppDataSource.getRepository(OrderProduct)
+
+    const topProducts = await orderProductRepository
+      .createQueryBuilder('orderProduct')
+      .select('product.id', 'id')
+      .addSelect('product.product_name', 'productName')
+      .addSelect('provider.name', 'providerName')
+      .addSelect('product.stock', 'stock')
+      .addSelect('SUM(orderProduct.quantity)', 'totalSold')
+      .innerJoin('orderProduct.product', 'product')
+      .innerJoin('product.provider', 'provider')
+      .groupBy('product.id')
+      .addGroupBy('product.product_name')
+      .addGroupBy('provider.name')
+      .addGroupBy('product.stock')
+      .orderBy('SUM(orderProduct.quantity)', 'DESC')
+      .limit(7)
+      .getRawMany()
+
+    return handleSuccess(
+      topProducts.map((item) => ({
+        id: item.id,
+        product_name: item.productName,
+        provider_name: item.providerName,
+        stock: item.stock,
+        total_sold: parseInt(item.totalSold, 10)
+      }))
+    )
   } catch (error: any) {
     return handleError(error.message)
   }

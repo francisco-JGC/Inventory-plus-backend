@@ -11,3 +11,11 @@ export interface IProductOrder {
   quantity: number
   price: number
 }
+
+export interface ITopProducts {
+  id: number
+  product_name: string
+  provider_name: string
+  stock: number
+  total_sold: number
+}
