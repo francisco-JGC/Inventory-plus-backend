@@ -20,11 +20,17 @@ export const getMonthlySalesInformation = async (): Promise<
     const endOfLastMonth = endOfMonth(subMonths(new Date(), 1))
 
     const currentSales = await orderRepository.find({
-      where: { created_at: Between(startOfCurrentMonth, endOfCurrentMonth) }
+      where: {
+        created_at: Between(startOfCurrentMonth, endOfCurrentMonth),
+        sale_status: true
+      }
     })
 
     const lastSales = await orderRepository.find({
-      where: { created_at: Between(startOfLastMonth, endOfLastMonth) }
+      where: {
+        created_at: Between(startOfLastMonth, endOfLastMonth),
+        sale_status: true
+      }
     })
 
     const currentCash = currentSales
