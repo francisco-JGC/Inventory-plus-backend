@@ -123,7 +123,7 @@ export const getInvoiceDetailsById = async (
 ): Promise<IHandleResponseController<Order>> => {
   try {
     const order = await AppDataSource.getRepository(Order).findOne({
-      where: { id },
+      where: { id, sale_status: true },
       relations: ['orderProducts', 'orderProducts.product']
     })
 
