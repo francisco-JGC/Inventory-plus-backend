@@ -6,3 +6,11 @@ export interface IGetMonthlySalesInformation {
   sales_percentage: number
   total_inventory_value: number
 }
+
+export interface IGetSalesLastSixMonths {
+  month: string
+  totalSales: number
+  totalRevenue: number
+  startDate: string
+  endDate: string
+}

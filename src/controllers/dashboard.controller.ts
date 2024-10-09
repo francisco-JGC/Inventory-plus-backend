@@ -3,7 +3,10 @@ import { AppDataSource } from '../config/database.config'
 import { Order } from '../entities/order/order.entity'
 import { getDefaultInventory } from './inventory.controller'
 import { handleError, handleSuccess, IHandleResponseController } from './types'
-import { IGetMonthlySalesInformation } from './types/dashboard.type'
+import {
+  IGetMonthlySalesInformation,
+  IGetSalesLastSixMonths
+} from './types/dashboard.type'
 import { Between } from 'typeorm'
 
 export const getMonthlySalesInformation = async (): Promise<
@@ -66,4 +69,44 @@ export const calculatePercentageDifference = (
   return percentageDifference.toFixed() === 'Infinity'
     ? 100
     : Number(percentageDifference.toFixed(2))
+}
+
+export const getSalesLastSixMonths = async (): Promise<
+  IHandleResponseController<IGetSalesLastSixMonths[]>
+> => {
+  try {
+    const orderRepository = AppDataSource.getRepository(Order)
+    const currentDate = new Date()
+    let salesData: IGetSalesLastSixMonths[] = []
+
+    for (let i = 0; i < 6; i++) {
+      const startDate = startOfMonth(subMonths(currentDate, i))
+      const endDate = endOfMonth(subMonths(currentDate, i))
+
+      const orders = await orderRepository.find({
+        where: {
+          created_at: Between(startDate, endDate),
+          sale_status: true
+        }
+      })
+
+      const totalSales = orders.length
+      const totalRevenue = orders.reduce(
+        (sum, order) => sum + order.total_price,
+        0
+      )
+
+      salesData.push({
+        month: startDate.toLocaleString('default', { month: 'long' }),
+        totalSales,
+        totalRevenue,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      })
+    }
+
+    return handleSuccess(salesData)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
 }
