@@ -117,3 +117,22 @@ export const changeOrderStatusSale = async (
     return handleError(error.message)
   }
 }
+
+export const getInvoiceDetailsById = async (
+  id: number
+): Promise<IHandleResponseController<Order>> => {
+  try {
+    const order = await AppDataSource.getRepository(Order).findOne({
+      where: { id },
+      relations: ['orderProducts', 'orderProducts.product']
+    })
+
+    if (!order) {
+      return handleNotFound('Factura no encontrada')
+    }
+
+    return handleSuccess(order)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
