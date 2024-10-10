@@ -4,6 +4,7 @@ import { AppDataSource } from '../config/database.config'
 import { Request, Response } from 'express'
 import { DateFormat } from '../utils/date-format'
 import { Provider } from '../entities/provider/provider.entity'
+import { Product } from '../entities/products/product.entity'
 
 export const generateSalesReport = async () => {
   try {
@@ -166,6 +167,151 @@ export const generateProvidersReport = async () => {
 export const downloadProvidersReport = async (_req: Request, res: Response) => {
   try {
     const reportBuffer = await generateProvidersReport()
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=reporte_de_ventas.xlsx'
+    )
+
+    res.send(reportBuffer)
+  } catch (error) {
+    console.error('Error al generar el reporte de ventas:', error)
+    res.status(500).json({ message: 'Error al generar el reporte de ventas.' })
+  }
+}
+
+export const generateInventoryReport = async () => {
+  try {
+    const products = await AppDataSource.getRepository(Product).find({
+      relations: ['provider']
+    })
+
+    const totalInventoryValue = products.reduce(
+      (sum, product) => sum + product.price * product.stock,
+      0
+    )
+    const totalProducts = products.length
+    const totalProviders = await AppDataSource.getRepository(Provider).count()
+    const lowStockProductsCount = products.filter(
+      (product) => product.stock < product.low_stock_limit
+    ).length
+
+    const workbook = await XlsxPopulate.fromBlankAsync()
+    const sheet = workbook.sheet(0)
+
+    const headers = [
+      'Nombre del producto',
+      'Stock',
+      'Límite de Stock Bajo',
+      'Nombre de proveedor',
+      'Fecha de Creación',
+      'Precio'
+    ]
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1)
+      cell.value(header)
+      cell.style({
+        bold: true,
+        fontSize: 12,
+        fontColor: 'FFFFFF',
+        fill: '4F81BD',
+        horizontalAlignment: 'center',
+        verticalAlignment: 'center'
+      })
+    })
+
+    products.forEach((product, index) => {
+      const row = index + 2
+
+      sheet.cell(`A${row}`).value(product.product_name)
+      sheet.cell(`B${row}`).value(product.stock)
+      sheet.cell(`C${row}`).value(product.low_stock_limit)
+      sheet
+        .cell(`D${row}`)
+        .value(product.provider ? product.provider.name : '-----')
+      sheet.cell(`E${row}`).value(product.created_at)
+      sheet.cell(`F${row}`).value(product.price)
+      ;['A', 'B', 'C', 'D', 'E', 'F'].forEach((column) => {
+        sheet.cell(`${column}${row}`).style({
+          border: true,
+          horizontalAlignment: 'center',
+          verticalAlignment: 'center'
+        })
+      })
+    })
+    ;['A', 'B', 'C', 'D', 'E', 'F'].forEach((column) => {
+      sheet.column(column).width(25)
+    })
+
+    const statsRow = products.length + 3
+    sheet
+      .cell(`A${statsRow}`)
+      .value('Valor total de inventario:')
+      .style({ bold: true })
+    sheet.cell(`B${statsRow}`).value(totalInventoryValue).style({
+      numberFormat: '$ #,##0.00',
+      bold: true,
+      border: true
+    })
+
+    sheet
+      .cell(`A${statsRow + 1}`)
+      .value('Total de productos:')
+      .style({ bold: true })
+    sheet
+      .cell(`B${statsRow + 1}`)
+      .value(totalProducts)
+      .style({
+        bold: true,
+        border: true
+      })
+
+    sheet
+      .cell(`A${statsRow + 2}`)
+      .value('Total de proveedores:')
+      .style({ bold: true })
+    sheet
+      .cell(`B${statsRow + 2}`)
+      .value(totalProviders)
+      .style({
+        bold: true,
+        border: true
+      })
+
+    sheet
+      .cell(`A${statsRow + 3}`)
+      .value('Productos con stock bajo:')
+      .style({ bold: true })
+    sheet
+      .cell(`B${statsRow + 3}`)
+      .value(lowStockProductsCount)
+      .style({
+        bold: true,
+        border: true
+      })
+
+    for (let i = statsRow; i <= statsRow + 3; i++) {
+      sheet.cell(`A${i}`).style({
+        horizontalAlignment: 'right'
+      })
+    }
+
+    const buffer = await workbook.outputAsync()
+    return buffer
+  } catch (error) {
+    console.error('Error generando el reporte de inventario:', error)
+    throw new Error('No se pudo generar el reporte de inventario.')
+  }
+}
+
+export const downloadInventoryReport = async (_req: Request, res: Response) => {
+  try {
+    const reportBuffer = await generateInventoryReport()
 
     res.setHeader(
       'Content-Type',
