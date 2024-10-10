@@ -11,7 +11,8 @@ import {
 import {
   ICreateUser,
   IResponseUser,
-  IFindUserByEmail
+  IFindUserByEmail,
+  IUpdateUser
 } from '../entities/user/types'
 import { getRoleByName } from './role.controller'
 import { Role } from '../entities/role/role.entity'
@@ -164,7 +165,7 @@ export const assignRoleToUser = async ({
       return handleNotFound('El usuario ya tiene asignado este rol')
     }
 
-    user.roles.push(role as Role)
+    user.roles = [role as Role]
     const response = await AppDataSource.getRepository(User).save(user)
 
     return handleSuccess(response)
@@ -174,7 +175,7 @@ export const assignRoleToUser = async ({
 }
 
 export const updateUserById = async (
-  user: User,
+  user: IUpdateUser,
   id: number
 ): Promise<IHandleResponseController<IResponseUser>> => {
   try {
@@ -188,6 +189,8 @@ export const updateUserById = async (
 
     AppDataSource.getRepository(User).merge(userExists, user)
     const updatedUser = await AppDataSource.getRepository(User).save(userExists)
+
+    await assignRoleToUser({ userId: id, role_name: user.role_name })
 
     return handleSuccess(updatedUser)
   } catch (error: any) {

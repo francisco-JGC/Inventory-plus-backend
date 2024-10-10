@@ -28,3 +28,11 @@ export interface ILoginResponse {
   email: string
   role: string
 }
+
+export interface IUpdateUser {
+  id: number
+  email: string
+  username: string
+  password?: string
+  role_name: string
+}
