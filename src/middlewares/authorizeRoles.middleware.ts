@@ -33,7 +33,7 @@ export const authorizeRoles = (allowedRoles: string[]) => {
       } else {
         return res.status(403).json({
           success: false,
-          message: 'No tienes permisos para acceder a esta ruta'
+          message: 'No tienes los permisos necesarios'
         })
       }
     } catch (error) {
