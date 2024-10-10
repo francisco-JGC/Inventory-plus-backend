@@ -3,6 +3,7 @@ import {
   createProduct,
   deleteProductById,
   getPaginationProduct,
+  getProductById,
   getProductsInvoice,
   replenishStock,
   updateProductById
@@ -74,6 +75,19 @@ router.get(
   authorizeRoles(['admin', 'inventory', 'seller']),
   async (_req, res) => {
     return res.json(await getProductsInvoice())
+  }
+)
+
+router.get(
+  '/:id',
+  isAuth,
+  authorizeRoles(['admin', 'inventory']),
+  async (req, res) => {
+    const { id } = req.params
+    const productId = parseInt(id, 10)
+
+    const result = await getProductById(productId)
+    return res.json(result)
   }
 )
 

@@ -264,3 +264,22 @@ export const updateProductById = async (
     return handleError(error.message)
   }
 }
+
+export const getProductById = async (
+  id: number
+): Promise<IHandleResponseController<Product>> => {
+  try {
+    const product = await AppDataSource.getRepository(Product).findOne({
+      where: { id },
+      relations: ['category', 'provider']
+    })
+
+    if (!product) {
+      return handleNotFound('Producto no encontrado')
+    }
+
+    return handleSuccess(product)
+  } catch (error: any) {
+    return handleError(error.message)
+  }
+}
