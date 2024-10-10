@@ -5,6 +5,7 @@ import { Request, Response } from 'express'
 import { DateFormat } from '../utils/date-format'
 import { Provider } from '../entities/provider/provider.entity'
 import { Product } from '../entities/products/product.entity'
+import { getSalesLastSixMonths } from './dashboard.controller'
 
 export const generateSalesReport = async () => {
   try {
@@ -312,6 +313,114 @@ export const generateInventoryReport = async () => {
 export const downloadInventoryReport = async (_req: Request, res: Response) => {
   try {
     const reportBuffer = await generateInventoryReport()
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=reporte_de_ventas.xlsx'
+    )
+
+    res.send(reportBuffer)
+  } catch (error) {
+    console.error('Error al generar el reporte de ventas:', error)
+    res.status(500).json({ message: 'Error al generar el reporte de ventas.' })
+  }
+}
+
+export const generateFluctuationReport = async () => {
+  try {
+    const { data: fluctuation } = await getSalesLastSixMonths()
+
+    const workbook = await XlsxPopulate.fromBlankAsync()
+    const sheet = workbook.sheet(0)
+
+    const headers = [
+      'Mes',
+      'Total de Ventas',
+      'Total de Ingresos',
+      'Fecha de Inicio',
+      'Fecha de Fin'
+    ]
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1)
+      cell.value(header)
+      cell.style({
+        bold: true,
+        fontSize: 12,
+        fontColor: 'FFFFFF',
+        fill: '4F81BD',
+        horizontalAlignment: 'center',
+        verticalAlignment: 'center'
+      })
+    })
+
+    fluctuation?.forEach((data, index) => {
+      const rowIndex = index + 2
+
+      const month = new Date(data.startDate).toLocaleString('default', {
+        month: 'long'
+      })
+
+      sheet.cell(`A${rowIndex}`).value(month)
+      sheet.cell(`B${rowIndex}`).value(data.totalSales)
+      sheet.cell(`C${rowIndex}`).value(data.totalRevenue)
+      sheet.cell(`D${rowIndex}`).value(DateFormat(data.startDate))
+      sheet.cell(`E${rowIndex}`).value(DateFormat(data.endDate))
+      ;['A', 'B', 'C', 'D', 'E'].forEach((column) => {
+        sheet.cell(`${column}${rowIndex}`).style({
+          border: true,
+          horizontalAlignment: 'center',
+          verticalAlignment: 'center'
+        })
+      })
+    })
+    ;['A', 'B', 'C', 'D', 'E'].forEach((column) => {
+      sheet.column(column).width(20)
+    })
+
+    const totalRow = (fluctuation?.length || 0) + 2
+    sheet.cell(`A${totalRow}`).value('Total').style({
+      bold: true,
+      horizontalAlignment: 'right'
+    })
+
+    const totalSales = fluctuation?.reduce(
+      (total, data) => total + data.totalSales,
+      0
+    )
+    const totalRevenue = fluctuation?.reduce(
+      (total, data) => total + data.totalRevenue,
+      0
+    )
+
+    sheet.cell(`B${totalRow}`).value(totalSales).style({
+      bold: true,
+      border: true
+    })
+
+    sheet.cell(`C${totalRow}`).value(totalRevenue).style({
+      bold: true,
+      border: true
+    })
+
+    const buffer = await workbook.outputAsync()
+    return buffer
+  } catch (error) {
+    console.error('Error generando el informe de ventas del mes:', error)
+    throw new Error('No se pudo generar el informe de ventas del mes.')
+  }
+}
+
+export const downloadFluctuationReport = async (
+  _req: Request,
+  res: Response
+) => {
+  try {
+    const reportBuffer = await generateFluctuationReport()
 
     res.setHeader(
       'Content-Type',

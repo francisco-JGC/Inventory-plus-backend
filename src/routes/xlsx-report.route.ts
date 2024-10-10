@@ -4,7 +4,8 @@ import { authorizeRoles } from '../middlewares/authorizeRoles.middleware'
 import {
   downloadInventoryReport,
   downloadProvidersReport,
-  downloadSalesReport
+  downloadSalesReport,
+  downloadFluctuationReport
 } from '../controllers/xlsxReport.controller'
 
 const router = Router()
@@ -28,6 +29,13 @@ router.get(
   isAuth,
   authorizeRoles(['admin']),
   downloadInventoryReport
+)
+
+router.get(
+  '/fluctuation-report',
+  isAuth,
+  authorizeRoles(['admin']),
+  downloadFluctuationReport
 )
 
 export default router
