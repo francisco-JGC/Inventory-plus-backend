@@ -42,8 +42,10 @@ export class Product {
   @OneToMany(() => OrderProduct, (orderProduct) => orderProduct.product)
   orderProducts: OrderProduct[]
 
-  @ManyToOne(() => Provider, (provider) => provider.products)
-  provider: Provider
+  @ManyToOne(() => Provider, (provider) => provider.products, {
+    nullable: true
+  })
+  provider: Provider | null
 
   @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date

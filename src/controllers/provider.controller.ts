@@ -9,6 +9,7 @@ import {
 } from './types'
 import { ICreateProvider, IProviderResponse } from '../entities/provider/types'
 import { ILike } from 'typeorm'
+import { Product } from '../entities/products/product.entity'
 
 export const createProvider = async (
   providerObj: ICreateProvider
@@ -113,9 +114,19 @@ export const deleteProviderById = async (
       return handleNotFound('Proveedor no encontrado')
     }
 
-    return handleSuccess(
-      await AppDataSource.getRepository(Provider).remove(provider)
-    )
+    if (provider.products.length > 0) {
+      await AppDataSource.getRepository(Product)
+        .createQueryBuilder()
+        .update(Product)
+        .set({ provider: null })
+        .where('providerId = :providerId', { providerId: provider.id })
+        .execute()
+    }
+
+    // Ahora eliminar el proveedor
+    await AppDataSource.getRepository(Provider).remove(provider)
+
+    return handleSuccess(provider)
   } catch (error: any) {
     return handleError(error.message)
   }

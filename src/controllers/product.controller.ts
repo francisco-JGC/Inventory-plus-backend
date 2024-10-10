@@ -143,7 +143,7 @@ export const getPaginationProduct = async ({
         low_stock_limit: product.low_stock_limit,
         status: product.status,
         created_at: product.created_at,
-        provider_name: product.provider.name,
+        provider_name: product.provider?.name || '',
         price: product.price
       }
     })
