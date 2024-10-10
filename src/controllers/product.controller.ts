@@ -19,6 +19,7 @@ import { getDefaultInventory } from './inventory.controller'
 import { Inventory } from '../entities/inventory/inventory.entity'
 import { ILike } from 'typeorm'
 import { Category } from '../entities/categories/category.entity'
+import { OrderProduct } from '../entities/order/order-product.entity'
 
 export const createProduct = async (
   product: ICreateProduct
@@ -167,13 +168,18 @@ export const deleteProductById = async (
       return handleNotFound('Producto no encontrado')
     }
 
-    console.log(inventory)
-
     inventory.inventory_value =
       Number(inventory.inventory_value) - product.price
     inventory.product_quantity = Number(inventory.product_quantity) - 1
 
     await AppDataSource.getRepository(Inventory).save(inventory)
+
+    await AppDataSource.getRepository(OrderProduct)
+      .createQueryBuilder()
+      .delete()
+      .from(OrderProduct)
+      .where('productId = :productId', { productId: product.id })
+      .execute()
 
     return handleSuccess(
       await AppDataSource.getRepository(Product).remove(product)
