@@ -41,6 +41,7 @@
     "express": "4.18.2",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.11.3",
-    "typeorm": "^0.3.17"
+    "typeorm": "^0.3.17",
+    "xlsx-populate": "^1.21.0"
   }
 }
