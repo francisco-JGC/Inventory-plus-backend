@@ -189,6 +189,8 @@ export const updateUserById = async (
 
     if (user.password) {
       user.password = await hash(user.password, 10)
+    } else {
+      delete user.password
     }
 
     AppDataSource.getRepository(User).merge(userExists, user)
