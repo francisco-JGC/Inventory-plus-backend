@@ -21,7 +21,7 @@ export const restoreDatabase = (fileName: string): Promise<boolean> => {
 
     process.env.PGPASSWORD = DB_PASS
 
-    const dropDBCommand = `dropdb -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} ${DB_NAME}`
+    const dropDBCommand = `dropdb --force  -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER} ${DB_NAME}`
 
     exec(dropDBCommand, (dropError, _stdout, stderr) => {
       if (dropError) {
