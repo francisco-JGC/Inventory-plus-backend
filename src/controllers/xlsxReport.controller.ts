@@ -6,6 +6,7 @@ import { DateFormat } from '../utils/date-format'
 import { Provider } from '../entities/provider/provider.entity'
 import { Product } from '../entities/products/product.entity'
 import { getSalesLastSixMonths } from './dashboard.controller'
+import { User } from '../entities/user/user.entity'
 
 export const generateSalesReport = async () => {
   try {
@@ -421,6 +422,86 @@ export const downloadFluctuationReport = async (
 ) => {
   try {
     const reportBuffer = await generateFluctuationReport()
+
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=reporte_de_ventas.xlsx'
+    )
+
+    res.send(reportBuffer)
+  } catch (error) {
+    console.error('Error al generar el reporte de ventas:', error)
+    res.status(500).json({ message: 'Error al generar el reporte de ventas.' })
+  }
+}
+
+export const generateUserReport = async () => {
+  try {
+    const users: User[] = await AppDataSource.getRepository(User).find({
+      relations: ['roles']
+    })
+
+    const workbook = await XlsxPopulate.fromBlankAsync()
+    const sheet = workbook.sheet(0)
+
+    const headers = [
+      'Correo Electrónico',
+      'Nombre de Usuario',
+      'Fecha de Creación',
+      'Nombre del Rol'
+    ]
+
+    headers.forEach((header, index) => {
+      const cell = sheet.cell(1, index + 1)
+      cell.value(header)
+      cell.style({
+        bold: true,
+        fontSize: 12,
+        fontColor: 'FFFFFF',
+        fill: '4F81BD',
+        horizontalAlignment: 'center',
+        verticalAlignment: 'center'
+      })
+    })
+
+    users.forEach((user, index) => {
+      const rowIndex = index + 2
+
+      sheet.cell(`A${rowIndex}`).value(user.email)
+      sheet.cell(`B${rowIndex}`).value(user.username)
+      sheet
+        .cell(`C${rowIndex}`)
+        .value(user.created_at.toISOString().split('T')[0])
+      sheet
+        .cell(`D${rowIndex}`)
+        .value(user.roles.map((role) => role.label).join(', '))
+      ;['A', 'B', 'C', 'D'].forEach((column) => {
+        sheet.cell(`${column}${rowIndex}`).style({
+          border: true,
+          horizontalAlignment: 'center',
+          verticalAlignment: 'center'
+        })
+      })
+    })
+    ;['A', 'B', 'C', 'D'].forEach((column) => {
+      sheet.column(column).width(25)
+    })
+
+    const buffer = await workbook.outputAsync()
+    return buffer
+  } catch (error) {
+    console.error('Error generando el informe de usuarios:', error)
+    throw new Error('No se pudo generar el informe de usuarios.')
+  }
+}
+
+export const downloadUserReport = async (_req: Request, res: Response) => {
+  try {
+    const reportBuffer = await generateUserReport()
 
     res.setHeader(
       'Content-Type',

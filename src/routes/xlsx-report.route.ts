@@ -5,7 +5,8 @@ import {
   downloadInventoryReport,
   downloadProvidersReport,
   downloadSalesReport,
-  downloadFluctuationReport
+  downloadFluctuationReport,
+  downloadUserReport
 } from '../controllers/xlsxReport.controller'
 
 const router = Router()
@@ -36,6 +37,13 @@ router.get(
   isAuth,
   authorizeRoles(['admin']),
   downloadFluctuationReport
+)
+
+router.get(
+  '/user-report',
+  isAuth,
+  authorizeRoles(['admin']),
+  downloadUserReport
 )
 
 export default router
